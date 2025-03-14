@@ -1,5 +1,4 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
 import React, { useState } from "react";
 import ProgressBar from "../components/ProgressBar";
 import StepOne from "../components/StepOne";
