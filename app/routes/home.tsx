@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import ProgressBar from "../components/ProgressBar";
 import StepOne from "../components/StepOne";
 import StepTwo from "../components/StepTwo";
-import StepThree from "../components/StepThree";
-import StepFour from "../components/StepFour";
 import "../styles/App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -15,7 +13,7 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-export const totalSteps = 4
+export const totalSteps = 2
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -26,10 +24,6 @@ export default function Home() {
         return <StepOne />;
       case 2:
         return <StepTwo />;
-      case 3:
-        return <StepThree />;
-      case 4:
-        return <StepFour />;
       default:
         return <StepOne />;
     }

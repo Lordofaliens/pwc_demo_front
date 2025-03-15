@@ -3,11 +3,11 @@ export interface SubmitParams {
     selectedOption: string;
 }
 
-export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParams): Promise<void> => {
+export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParams): Promise<any> => {
     if (uploadedFile) {
         console.log("Submitting:", {
             option: selectedOption,
-            file: uploadedFile,
+            file: uploadedFile.name,
         });
 
         try {
@@ -15,7 +15,7 @@ export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParam
             formData.append('file', uploadedFile);
             formData.append('option', selectedOption);
 
-            const response = await fetch('/upload', {
+            const response = await fetch('http://localhost:5000/gateway/calculate-pva', {
                 method: 'POST',
                 body: formData,
             });
@@ -27,10 +27,11 @@ export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParam
             const result = await response.json();
             console.log("Response received:", result);
 
-            // Store the result for step2 to use
+            // Assuming the response contains the data that you want to store or use in further steps
             localStorage.setItem('step2Data', JSON.stringify(result));
 
             alert("Form submitted successfully!");
+            return result;
         } catch (error) {
             console.error("Error submitting form:", error);
             alert("There was an error submitting the form. Please try again.");
@@ -39,3 +40,4 @@ export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParam
         alert("Please upload a file before submitting.");
     }
 };
+
