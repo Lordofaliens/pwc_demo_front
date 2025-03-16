@@ -35,11 +35,48 @@ interface SubmitParams {
             setStatus('successful');
             setGlobalResponseData(response);
             finalizeSchemaProp();
+            setStatus('pending');
         } catch (error) {
             console.error("Error during request:", error);
             setStatus('failed');
         }
     }
+    const parseSchema = (schemaString: string) => {
+      if (!schemaString) return [];
+      
+      const lines = schemaString.split('\n');
+      const stack: any[] = [{ level: -1, children: [] }];
+      
+      lines.forEach((line) => {
+        const indent = (line.match(/^\s*/)?.[0].length || 0);
+        const level = Math.floor(indent / 4);
+        const text = line.replace(/^\s*-\s*/, '').trim();
+    
+        // Find the appropriate parent level
+        while (stack.length > 0 && stack[stack.length - 1].level >= level) {
+          stack.pop();
+        }
+    
+        const parent = stack[stack.length - 1];
+        const newNode = { text, children: [], level };
+        parent.children.push(newNode);
+        stack.push(newNode);
+      });
+    
+      return stack[0].children;
+    };
+
+    const renderNestedList = (items: any[]) => (
+      <ul style={{ listStyleType: 'none', paddingLeft: '1em' }}>
+        {items.map((item, index) => (
+          <li key={index} className="font-mono">
+            <span className="text-gray-600">- </span>
+            {item.text}
+            {item.children.length > 0 && renderNestedList(item.children)}
+          </li>
+        ))}
+      </ul>
+    );
   
     const handleSendMessage = async () => {
       if (!inputMessage.trim() || isLoading) return;
@@ -59,7 +96,7 @@ interface SubmitParams {
         // Correctly uses response.schema
         setConversationHistory(`${updatedPrompt}\nAssistant: ${response.schema}`);
         setMessages([...newMessages, { 
-            content : "Ok, I have genrated the schema for you.",
+            content : "Ok, I have generated the schema for you, have a look!",
             isUser: false 
         }]);
         setSchema(responseString);
@@ -81,9 +118,9 @@ interface SubmitParams {
         <div className="schema-preview mb-6">
           <h4 className="text-lg font-semibold mb-3">Generated Schema:</h4>
           {schema ? (
-            <pre className="p-3 bg-gray-100 rounded" style={{ whiteSpace: 'pre-wrap' }}>
+            <div className="p-3 bg-gray-100 rounded">
               {schema}
-            </pre>
+            </div>
           ) : (
             <div className="text-gray-500">No schema generated yet...</div>
           )}
