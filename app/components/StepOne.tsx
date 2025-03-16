@@ -1,13 +1,22 @@
-import React, { useState, useRef, type ChangeEvent } from 'react';
-import { handleSubmit } from '~/controller';
+import React, { useState, useRef, type ChangeEvent, useEffect } from 'react';
+import { handleLLMRequest, handleSubmit} from '~/controller';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { setGlobalResponseData } from '~/globalState';
+import { setGlobalResponseData, setGlobalSchema, getGlobalSchema, setGlobalFile, getGlobalFile } from '~/globalState';
 
-const StepOne: React.FC = () => {
+interface StepOneProps {
+    onSuccess: (data: { file: File, initialSchema: string }) => void;
+}
+const StepOne: React.FC<StepOneProps> = ({ onSuccess }) => {
     const [selectedOption, setSelectedOption] = useState<string>('Per Person');
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-    const [status, setStatus] = useState<string>(''); // State to track request status
+    const [status, setStatus] = useState<string>('');  
+    const [isClient, setIsClient] = useState(false); // Client check state
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Only run on client-side
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const handleOptionChange = (event: ChangeEvent<HTMLInputElement>) => {
         setSelectedOption(event.target.value);
@@ -27,20 +36,49 @@ const StepOne: React.FC = () => {
     };
 
     const onSubmitClick = async () => {
-        // Set status to 'pending' before sending the request
         setStatus('pending');
-
         try {
-            const response = await handleSubmit({ uploadedFile, selectedOption });
-            console.log("RESPONSE FROM SERVER:", response);
+            // Ensure this is only called after the component has mounted
+            if (!isClient || !uploadedFile) return;  // Prevent running before client-side hydration
 
-            // Set status to 'successful' if response is successful
+            // Your LLM model logic
+            const firstPrompt = `
+            Given the following transactional data in CSV format, suggest a star schema with a fact table. The data is provided below:
+
+            **Requirements:**
+            1. **Fact Table**: Must include the following columns:
+            - CustomerID (Foreign Key referencing Customer_Dim)
+            - ProductID (Foreign Key referencing Product_Dim)
+            - Index (Preserved unique ID for the transaction)
+            - InvoiceNo (Invoice number for the transaction)
+            - Quantity (Quantity of the product sold)
+
+            2. **Dimension Tables**: Make 4 dimensions tables:
+            - **Time_Dim**
+            - **Product_Dim**
+            - **Customer_Dim**
+            - **Geography_Dim**
+
+            **Output Format**:
+            Please provide the schema in the following format:
+            - Fact Table: [fact table columns]
+            - Dimension Tables: [dimension table columns]
+            `;  
+            const response = await handleLLMRequest(uploadedFile, firstPrompt);
+            const initialSchema = response.schema;
+            console.log("Initial Schema:", initialSchema);
+            setGlobalSchema(initialSchema);
+            if (uploadedFile) {
+                onSuccess({
+                    file: uploadedFile,
+                    initialSchema: JSON.stringify(initialSchema),
+                });
+            }
+
+            setGlobalFile(uploadedFile);
             setStatus('successful');
-            setGlobalResponseData(response);
-        } catch (error) {
-            console.error("Error during request:", error);
 
-            // Set status to 'failed' if there was an error
+        } catch (error) {
             setStatus('failed');
         }
     };

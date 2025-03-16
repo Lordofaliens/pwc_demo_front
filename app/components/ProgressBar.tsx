@@ -8,14 +8,14 @@ interface ProgressBarProps {
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps }) => {
-    const steps = Array.from({ length: totalSteps }, (_, index) => `Step ${index + 1}`);
+    const stepLabels = ['Ingestion', 'Schema Analysis', 'Visualization'];
 
     return (
         <div className="progress-bar-container">
-            {steps.map((step, index) => (
+            {stepLabels.map((label, index) => (
                 <div key={index} className="progress-step-container">
                     <div className={`progress-step ${currentStep >= index + 1 ? 'completed' : ''}`}>
-                        {index + 1}
+                        {label}
                     </div>
                     {index < totalSteps - 1 && (
                         <div className={`progress-line ${currentStep > index + 1 ? 'completed' : ''}`}></div>

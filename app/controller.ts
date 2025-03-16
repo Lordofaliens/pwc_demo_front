@@ -3,7 +3,7 @@ export interface SubmitParams {
     selectedOption: string;
 }
 
-export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParams): Promise<any> => {
+export const handleSubmit = async (uploadedFile : File, selectedOption: string): Promise<any> => {
     if (uploadedFile) {
         console.log("Submitting:", {
             option: selectedOption,
@@ -13,7 +13,6 @@ export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParam
         try {
             const formData = new FormData();
             formData.append('file', uploadedFile);
-            formData.append('option', selectedOption);
 
             const response = await fetch('http://localhost:5000/gateway/calculate-pva', {
                 method: 'POST',
@@ -41,3 +40,30 @@ export const handleSubmit = async ({ uploadedFile, selectedOption }: SubmitParam
     }
 };
 
+interface SchemaResponse {
+    schema: string;
+    analysis: string;
+}
+  
+export const handleLLMRequest = async (file: File, prompt: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('prompt', prompt); // Make sure this matches the backend parameter name
+  
+    try {
+      const response = await fetch('http://localhost:5000/gateway/generate-schema', {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type header - browser will set it automatically with boundary
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('LLM Request Error:', error);
+      throw new Error('Failed to communicate with Gemini: ');
+    }
+  };

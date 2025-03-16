@@ -3,29 +3,46 @@ import React, { useState } from "react";
 import ProgressBar from "../components/ProgressBar";
 import StepOne from "../components/StepOne";
 import StepTwo from "../components/StepTwo";
+import StepOne_Point_five from "../components/StepOne_Point_five";
 import "../styles/App.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function meta({ }: Route.MetaArgs) {
   return [
     { title: "PwC Price Volume analysis" },
-    { name: "description", content: "Our prototype for PwC Price volumen analysis" },
+    { name: "description", content: "Our prototype for PwC Price Volume Analysis" },
   ];
 }
 
-export const totalSteps = 2
+export const totalSteps = 3
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [initialSchema, setInitialSchema] = useState<string | undefined>(undefined);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const handleStepOneSuccess = (data: { file: File, initialSchema: string }) => {
+    setInitialSchema(data.initialSchema);
+    setUploadedFile(data.file);
+    setCurrentStep(2);
+  };
+  
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <StepOne />;
+        return <StepOne onSuccess={handleStepOneSuccess} />;
       case 2:
+        return <StepOne_Point_five 
+        initialSchema={initialSchema} 
+        file={uploadedFile} 
+        onFinalizeSchema={() => setCurrentStep(3)} 
+        selectedOption="Per Person"
+      />
+      case 3:
         return <StepTwo />;
       default:
-        return <StepOne />;
+        return <StepOne onSuccess={handleStepOneSuccess} />;
     }
   };
 
@@ -58,3 +75,4 @@ export default function Home() {
     </div>
   );
 }
+
