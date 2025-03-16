@@ -53,22 +53,6 @@ export default function Home() {
       </header>
       <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
       {renderStep()}
-      <div className="d-flex justify-content-between mt-4">
-        <button
-          className="btn btn-secondary"
-          onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 1))}
-          disabled={currentStep === 1}
-        >
-          Previous
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={() => setCurrentStep((prev) => Math.min(prev + 1, totalSteps))}
-          disabled={currentStep === totalSteps}
-        >
-          Next
-        </button>
-      </div>
       <footer className="bg-light text-center py-3 mt-4">
         <p>&copy; Made for 2025 TU Delft software project to PwC</p>
       </footer>

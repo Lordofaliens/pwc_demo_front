@@ -8,12 +8,20 @@ const StepTwo: React.FC = () => {
     useEffect(() => {
         const chartData = getGlobalResponseData();
 
+        let firstYearProjection = chartData ? chartData.firstYearProjection : 0;
+        let totalPriceImpact = chartData ? chartData.totalPriceImpact : 0;
+        let totalMixImpact = chartData ? chartData.totalMixImpact : 0;
+        let totalVolumeImpact = chartData ? chartData.totalVolumeImpact : 0;
+        let secondYearProjection = chartData ? chartData.secondYearProjection : 0;
+
+
+
         const data = [
-            { label: "Initial Value", open: 0, close: chartData.firstYearProjection },
-                        { label: "Price", open: chartData.firstYearProjection, close: chartData.firstYearProjection + chartData.totalPriceImpact },
-                        { label: "Mix", open: chartData.firstYearProjection + chartData.totalPriceImpact, close: chartData.firstYearProjection + chartData.totalPriceImpact - chartData.totalMixImpact },
-                        { label: "Volume", open: chartData.firstYearProjection + chartData.totalPriceImpact - chartData.totalMixImpact, close : chartData.firstYearProjection + chartData.totalPriceImpact + chartData.totalVolumeImpact },
-                        { label: "Result Value", open: 0, close: chartData.firstYearProjection + chartData.totalPriceImpact + chartData.totalVolumeImpact }
+            { label: "Initial Value", open: 0, close: firstYearProjection },
+                        { label: "Price", open: firstYearProjection, close: firstYearProjection + totalPriceImpact },
+                        { label: "Mix", open: firstYearProjection + totalPriceImpact, close: firstYearProjection + totalPriceImpact - totalMixImpact },
+                        { label: "Volume", open: firstYearProjection + totalPriceImpact - totalMixImpact, close : firstYearProjection + totalPriceImpact + totalVolumeImpact },
+                        { label: "Result Value", open: 0, close: firstYearProjection + totalPriceImpact + totalVolumeImpact }
         ];
 
         const svgWidth = 500;
@@ -36,7 +44,10 @@ const StepTwo: React.FC = () => {
             .paddingOuter(0.2);
 
         const yScale = d3.scaleLinear()
-            .domain([0, d3.max(data, (d: { open: number; close: number; }) => Math.max(d.open, d.close))])
+            .domain([
+                0,
+                d3.max(data, d => Math.max(d.open, d.close)) ?? 0
+            ])
             .nice()
             .range([svgHeight - margin.top - margin.bottom, 0]);
 
@@ -46,7 +57,7 @@ const StepTwo: React.FC = () => {
             .enter()
             .append('rect')
             .attr('class', 'candle')
-            .attr('x', (d: any, i: { toString: () => any; }) => xScale(i.toString()))
+            .attr('x', (_, i) => xScale(i.toString()) ?? 0)
             .attr('y', (d: { open: number; close: number; }) => yScale(Math.max(d.open, d.close))) // Position the top of the bar
             .attr('width', barWidth)
             .attr('height', (d: { open: any; close: any; }) => Math.abs(yScale(d.open) - yScale(d.close))) // Height based on Open/Close difference
@@ -58,7 +69,7 @@ const StepTwo: React.FC = () => {
             .enter()
             .append('text')
             .attr('class', 'label')
-            .attr('x', (d: any, i: { toString: () => any; }) => xScale(i.toString()) + barWidth / 2) // Center the label
+            .attr('x', (_, i) => (xScale(i.toString()) ?? 0) + barWidth / 2) // Center the label
             .attr('y', svgHeight - margin.top - margin.bottom + 15) // Position the label slightly below each bar
             .attr('text-anchor', 'middle')
             .attr('fill', 'black')
@@ -70,7 +81,7 @@ const StepTwo: React.FC = () => {
             .enter()
             .append('text')
             .attr('class', 'magnitude')
-            .attr('x', (d: any, i: { toString: () => any; }) => xScale(i.toString()) + barWidth / 2) // Center the label on top of the bar
+            .attr('x', (_, i) => (xScale(i.toString()) ?? 0) + barWidth / 2) // Center the label on top of the bar
             .attr('y', (d: { open: number; close: number; }) => yScale(Math.max(d.open, d.close)) - 5) // Position the label just above the bar
             .attr('text-anchor', 'middle')
             .attr('fill', 'black')
@@ -83,9 +94,9 @@ const StepTwo: React.FC = () => {
             .enter()
             .append('line')
             .attr('class', 'x-axis')
-            .attr('x1', (d: any, i: { toString: () => any; }) => xScale(i.toString()) + barWidth / 2)
+            .attr('x', (_, i) => (xScale(i.toString()) ?? 0) + barWidth / 2)
             .attr('y1', yScale(0))
-            .attr('x2', (d: any, i: { toString: () => any; }) => xScale(i.toString()) + barWidth / 2)
+            .attr('x', (_, i) => (xScale(i.toString()) ?? 0) + barWidth / 2)
             .attr('y2', svgHeight - margin.top - margin.bottom)
             .attr('stroke', 'black')
             .attr('stroke-width', 1);

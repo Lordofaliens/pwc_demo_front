@@ -29,7 +29,6 @@ export const handleSubmit = async (uploadedFile : File, selectedOption: string):
             // Assuming the response contains the data that you want to store or use in further steps
             localStorage.setItem('step2Data', JSON.stringify(result));
 
-            alert("Form submitted successfully!");
             return result;
         } catch (error) {
             console.error("Error submitting form:", error);

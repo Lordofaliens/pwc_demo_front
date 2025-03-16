@@ -157,7 +157,24 @@ interface SubmitParams {
             </button>
           </div>
         </div>
-  
+          {/* Status container */}
+          <div className="status-container mt-3">
+              {status === 'pending' && (
+                  <div className="alert alert-warning" role="alert">
+                      <strong>Request is pending...</strong> Please wait while we process your data.
+                  </div>
+              )}
+              {status === 'successful' && (
+                  <div className="alert alert-success" role="alert">
+                      <strong>Success!</strong> Your data has been processed successfully.
+                  </div>
+              )}
+              {status === 'failed' && (
+                  <div className="alert alert-danger" role="alert">
+                      <strong>Failed!</strong> There was an error processing your request. Please try again.
+                  </div>
+              )}
+          </div>
         <button
           className="btn btn-success mt-3"
           onClick={finalizeSchema}
